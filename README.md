@@ -14,7 +14,9 @@ Project Milestones - 2 months(plus testing)
 ### Database and API design(1 week)
 Identify all entities
 Identify all the required end-points
-Test
+1. Database design
+2. Create all the entities and their relationships
+3. Create all related repositories
 
 ### Implementation and Testing(5 weeks)
 Implement all listed in 2 above
