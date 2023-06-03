@@ -1,20 +1,20 @@
-import { OpenAPIV3 } from 'express-openapi-validator/dist/framework/types';
-import { error, errorResponseSchema } from './error';
-import { userResponseSchema } from './response';
+import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types'
+import { error, errorResponseSchema } from './error'
+import { userResponseSchema } from './response'
 
-const v1Prefix = 'v1';
+const v1Prefix = 'v1'
 
 export const spec: OpenAPIV3.Document = {
   openapi: '3.0.3',
   info: {
     title: 'Pawsmob',
     version: 'v1',
-    description: 'Describe what this app does',
+    description: 'Describe what this app does'
   },
   servers: [
     {
-      url: 'http://localhost:3000',
-    },
+      url: 'http://localhost:3000'
+    }
   ],
   paths: {
     [`/${v1Prefix}/user`]: {
@@ -31,14 +31,14 @@ export const spec: OpenAPIV3.Document = {
                 properties: {
                   email: {
                     type: 'string',
-                    format: 'email',
-                  },
+                    format: 'email'
+                  }
                 },
                 required: ['email'],
-                additionalProperties: false,
-              },
-            },
-          },
+                additionalProperties: false
+              }
+            }
+          }
         },
         responses: {
           201: {
@@ -46,18 +46,18 @@ export const spec: OpenAPIV3.Document = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#components/schemas/User',
-                },
-              },
-            },
+                  $ref: '#components/schemas/User'
+                }
+              }
+            }
           },
           400: error('Bad Request'),
           401: error('Authentication required'),
           403: error('Forbidden!'),
           404: error('Not Found'),
-          500: error('Internal Server Error'),
-        },
-      },
+          500: error('Internal Server Error')
+        }
+      }
     },
     [`/${v1Prefix}/user/{id}`]: {
       get: {
@@ -70,9 +70,9 @@ export const spec: OpenAPIV3.Document = {
             in: 'path',
             required: true,
             schema: {
-              type: 'string',
-            },
-          },
+              type: 'string'
+            }
+          }
         ],
         responses: {
           200: {
@@ -80,14 +80,14 @@ export const spec: OpenAPIV3.Document = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/User',
-                },
-              },
-            },
+                  $ref: '#/components/schemas/User'
+                }
+              }
+            }
           },
-          404: error('User not found'),
-        },
-      },
+          404: error('User not found')
+        }
+      }
     }
   },
   components: {
@@ -95,13 +95,13 @@ export const spec: OpenAPIV3.Document = {
       Authorization: {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
+        bearerFormat: 'JWT'
+      }
     },
     headers: {},
     schemas: {
       Error: errorResponseSchema,
-      User: userResponseSchema,
-    },
-  },
-};
+      User: userResponseSchema
+    }
+  }
+}

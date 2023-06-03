@@ -1,26 +1,26 @@
-import { User } from "@prisma/client"
-import { UserRepository } from "../repository/userRepository";
-import { DomainErrror } from "../utils/error";
+import { type User } from '@prisma/client'
+import { type UserRepository } from '../repository/userRepository'
+import { DomainErrror } from '../utils/error'
 
 export interface UserService {
-  getUserById(userId: string): Promise<User | undefined>;
-  createUser(emails: string): Promise<User>;
+  getUserById: (userId: string) => Promise<User | undefined>
+  createUser: (emails: string) => Promise<User>
 }
 
 export class UserServiceImpl implements UserService {
-  constructor(private userRepository: UserRepository) { }
+  constructor (private readonly userRepository: UserRepository) { }
 
-  async getUserById(userId: string): Promise<User> {
-    const user = await this.userRepository.getById(userId);
+  async getUserById (userId: string): Promise<User> {
+    const user = await this.userRepository.getById(userId)
 
     if (user === undefined) {
-      throw DomainErrror.notFound(['user does not exist']);
+      throw DomainErrror.notFound(['user does not exist'])
     }
 
-    return user;
+    return user
   }
 
-  async createUser(email: string): Promise<User> {
-    return this.userRepository.create(email);
+  async createUser (email: string): Promise<User> {
+    return await this.userRepository.create(email)
   }
 };

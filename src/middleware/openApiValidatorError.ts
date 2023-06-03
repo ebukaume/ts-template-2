@@ -1,39 +1,39 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
-import { error as eovErrors } from 'express-openapi-validator';
-import { DomainErrror } from "../utils/error";
+import { type ErrorRequestHandler, type NextFunction, type Request, type Response } from 'express'
+import { error as eovErrors } from 'express-openapi-validator'
+import { DomainErrror } from '../utils/error'
 
-export function openAPIValidatorErrorMiddleware(): ErrorRequestHandler {
+export function openAPIValidatorErrorMiddleware (): ErrorRequestHandler {
   return function (error: unknown, _req: Request, _res: Response, next: NextFunction): void {
     if (error instanceof eovErrors.BadRequest) {
-      return next(DomainErrror.badRequest([error.message]));
+      next(DomainErrror.badRequest([error.message])); return
     }
     if (error instanceof eovErrors.Unauthorized) {
-      return next(DomainErrror.unauthorized());
+      next(DomainErrror.unauthorized()); return
     }
     if (error instanceof eovErrors.Forbidden) {
-      return next(DomainErrror.forbidden());
+      next(DomainErrror.forbidden()); return
     }
     if (error instanceof eovErrors.MethodNotAllowed) {
-      return next(DomainErrror.unprocessableEntity([error.message]));
+      next(DomainErrror.unprocessableEntity([error.message])); return
     }
     if (error instanceof eovErrors.NotFound) {
-      return next(DomainErrror.notFound([error.message]));
+      next(DomainErrror.notFound([error.message])); return
     }
     if (error instanceof eovErrors.NotAcceptable) {
-      return next(DomainErrror.unprocessableEntity([error.message]));
+      next(DomainErrror.unprocessableEntity([error.message])); return
     }
     if (error instanceof eovErrors.MethodNotAllowed) {
-      return next(DomainErrror.notFound([error.message]));
+      next(DomainErrror.notFound([error.message])); return
     }
     if (error instanceof eovErrors.RequestEntityTooLarge) {
-      return next(DomainErrror.unprocessableEntity([error.message]));
+      next(DomainErrror.unprocessableEntity([error.message])); return
     }
     if (error instanceof eovErrors.UnsupportedMediaType) {
-      return next(DomainErrror.unprocessableEntity([error.message]));
+      next(DomainErrror.unprocessableEntity([error.message])); return
     }
     if (error instanceof eovErrors.InternalServerError) {
-      return next(DomainErrror.internalError([error.message]));
+      next(DomainErrror.internalError([error.message])); return
     }
-    next(error);
-  };
+    next(error)
+  }
 }
