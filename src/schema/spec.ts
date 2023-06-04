@@ -1,6 +1,7 @@
 import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types';
 import { error, errorResponseSchema } from './error';
 import { userResponseSchema } from './response';
+import { userCreateSchema } from './request';
 
 const v1Prefix = 'v1';
 
@@ -27,15 +28,7 @@ export const spec: OpenAPIV3.Document = {
           content: {
             'application/json': {
               schema: {
-                type: 'object',
-                properties: {
-                  email: {
-                    type: 'string',
-                    format: 'email'
-                  }
-                },
-                required: ['email'],
-                additionalProperties: false
+                $ref: '#components/schemas/UserCreate'
               }
             }
           }
@@ -101,7 +94,8 @@ export const spec: OpenAPIV3.Document = {
     headers: {},
     schemas: {
       Error: errorResponseSchema,
-      User: userResponseSchema
+      User: userResponseSchema,
+      UserCreate: userCreateSchema
     }
   }
 };

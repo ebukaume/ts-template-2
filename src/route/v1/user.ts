@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from 'express';
 import { getServices } from '../../module/configureApp';
+import { ResponseBuilder } from '../../utils/responseBuilder';
 
 const router = Router();
 
@@ -8,11 +9,7 @@ async function getUserById (req: Request, res: Response): Promise<void> {
 
   const user = await userService.getUserById(req.params.id);
 
-  res.status(200).json({
-    data: {
-      user
-    }
-  });
+  ResponseBuilder.success(res, 200, { user });
 }
 
 async function createUser (req: Request, res: Response): Promise<void> {
@@ -21,11 +18,7 @@ async function createUser (req: Request, res: Response): Promise<void> {
 
   const user = await userService.createUser(email);
 
-  res.status(201).json({
-    data: {
-      user
-    }
-  });
+  ResponseBuilder.success(res, 201, { user });
 }
 
 // eslint-disable-next-line

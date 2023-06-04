@@ -2,9 +2,10 @@ import { z } from 'zod';
 import { generateSchema } from '@anatine/zod-openapi';
 
 const user = z.object({
-  email: z.string().email()
+  email: z.string().email(),
+  name: z.string().optional()
 });
 
-const userSchema = generateSchema(user);
+const userCreateSchema = generateSchema(user);
 
-export { userSchema };
+export { userCreateSchema };
