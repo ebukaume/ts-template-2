@@ -1,4 +1,4 @@
-import { type PrismaClient, type User } from '@prisma/client'
+import { type PrismaClient, type User } from '@prisma/client';
 
 export interface UserRepository {
   getById: (userId: string) => Promise<User | undefined>
@@ -13,14 +13,14 @@ export class UserRepositoryImpl implements UserRepository {
       where: {
         id: userId
       }
-    })
+    });
 
-    return user ?? undefined
+    return user ?? undefined;
   }
 
   async create (email: string): Promise<User> {
     return await this.client.user.create({
       data: { email }
-    })
+    });
   }
 };

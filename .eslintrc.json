@@ -10,5 +10,10 @@
         "sourceType": "module",
         "project": "tsconfig.json"
     },
-    "rules": {}
+    "rules": {
+        "@typescript-eslint/semi": [
+            2,
+            "always"
+        ]
+    }
 }

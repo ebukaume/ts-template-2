@@ -1,8 +1,8 @@
-import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types'
-import { error, errorResponseSchema } from './error'
-import { userResponseSchema } from './response'
+import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types';
+import { error, errorResponseSchema } from './error';
+import { userResponseSchema } from './response';
 
-const v1Prefix = 'v1'
+const v1Prefix = 'v1';
 
 export const spec: OpenAPIV3.Document = {
   openapi: '3.0.3',
@@ -104,4 +104,4 @@ export const spec: OpenAPIV3.Document = {
       User: userResponseSchema
     }
   }
-}
+};

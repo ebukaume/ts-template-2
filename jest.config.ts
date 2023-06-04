@@ -1,28 +1,28 @@
-import { Config } from 'jest'
+import { type Config } from 'jest';
 
 const config: Config = {
   clearMocks: true,
   collectCoverage: true,
-  coverageDirectory: "coverage",
-  coverageProvider: "v8",
+  coverageDirectory: 'coverage',
+  coverageProvider: 'v8',
   preset: 'ts-jest',
   testEnvironment: 'node',
   coverageReporters: [
-    "json",
-    "text",
-    "text-summary",
-    "lcov",
-    "clover"
+    'json',
+    'text',
+    'text-summary',
+    'lcov',
+    'clover'
   ],
   testMatch: [
-    "**/__test__/**/*spec*.ts",
+    '**/__test__/**/*spec*.ts'
   ],
   collectCoverageFrom: [
-    "src/**/*.ts"
+    'src/**/*.ts'
   ],
   testPathIgnorePatterns: [
-    "/node_modules/"
-  ],
+    '/node_modules/'
+  ]
 };
 
 export default config;
