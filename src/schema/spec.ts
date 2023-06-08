@@ -1,7 +1,7 @@
 import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types';
 import { error, errorResponseSchema } from './error';
-import { userResponseSchema } from './response';
-import { userCreateSchema } from './request';
+import { userRegistrationResponseSchema } from './response';
+import { userRegisterationInputSchema } from './request';
 
 const v1Prefix = 'v1';
 
@@ -18,49 +18,82 @@ export const spec: OpenAPIV3.Document = {
     }
   ],
   paths: {
-    [`/${v1Prefix}/user`]: {
+    [`/${v1Prefix}/register`]: {
       post: {
-        tags: ['user'],
-        summary: 'Create a user',
-        description: 'Create a user',
+        tags: ['auth'],
+        summary: 'Registers an account for a user',
+        description: 'Registers an account for a user',
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
-                $ref: '#components/schemas/UserCreate'
+                type: 'object',
+                properties: {
+                  username: {
+                    type: 'string'
+                  },
+                  name: {
+                    type: 'object',
+                    properties: {
+                      first: {
+                        type: 'string'
+                      },
+                      last: {
+                        type: 'string'
+                      }
+                    }
+                  },
+                  email: {
+                    type: 'string'
+                  },
+                  password: {
+                    type: 'string'
+                  },
+                  passwordConfirmation: {
+                    type: 'string'
+                  }
+                },
+                required: ['username', 'email', 'password', 'passwordConfirmation'],
+                additionalProperties: false
               }
             }
           }
         },
         responses: {
           201: {
-            description: 'Returns the created user',
+            description: 'Returns the id of the user',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#components/schemas/User'
+                  $ref: '#components/schemas/UserRegistrationOutput'
                 }
               }
             }
           },
           400: error('Bad Request'),
-          401: error('Authentication required'),
-          403: error('Forbidden!'),
-          404: error('Not Found'),
-          500: error('Internal Server Error')
+          500: error('Internal Server Error'),
+          '4XX': error('Your problem')
         }
       }
     },
-    [`/${v1Prefix}/user/{id}`]: {
+    [`/${v1Prefix}/confirm-email`]: {
       get: {
-        tags: ['user'],
-        summary: 'Find a user by id',
-        description: 'Find a user by id',
+        tags: ['auth'],
+        summary: 'Complete user registeration flow by confirming the provided email address',
+        description: 'Complete user registeration flow by confirming the provided email address',
         parameters: [
           {
-            name: 'id',
-            in: 'path',
+            name: 'email',
+            in: 'query',
+            required: true,
+            schema: {
+              type: 'string'
+            }
+          },
+          {
+            name: 'token',
+            in: 'query',
             required: true,
             schema: {
               type: 'string'
@@ -69,16 +102,19 @@ export const spec: OpenAPIV3.Document = {
         ],
         responses: {
           200: {
-            description: 'Returns the user if found',
+            description: 'Confirmation successful',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/UserRegistrationOutput'
                 }
               }
             }
           },
-          404: error('User not found')
+          400: error('Bad Request'),
+          404: error('User not found'),
+          422: error('Unprocessible entity'),
+          500: error('Internal server error')
         }
       }
     }
@@ -94,8 +130,8 @@ export const spec: OpenAPIV3.Document = {
     headers: {},
     schemas: {
       Error: errorResponseSchema,
-      User: userResponseSchema,
-      UserCreate: userCreateSchema
+      UserRegistrationOutput: userRegistrationResponseSchema,
+      UserRegisterationInput: userRegisterationInputSchema
     }
   }
 };

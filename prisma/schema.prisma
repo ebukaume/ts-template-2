@@ -10,19 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// For testing 
 model User {
-  id    String  @id @default(uuid())
-  email String  @unique
-  name  String?
-  posts Post[]
-}
-
-model Post {
-  id        String  @id @default(uuid())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  String
+  id                     String  @id @default(uuid())
+  email                  String  @unique
+  name                   String?
+  username               String?
+  password               String
+  emailConfirmationToken String?
 }

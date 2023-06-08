@@ -15,7 +15,7 @@ const config: Config = {
     'clover'
   ],
   testMatch: [
-    '**/__test__/**/*spec*.ts'
+    '**/*.spec.ts'
   ],
   collectCoverageFrom: [
     'src/**/*.ts'

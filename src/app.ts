@@ -18,8 +18,8 @@ app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(spec));
 app.use(
   OpenApiValidator.middleware({
     apiSpec: spec,
-    validateRequests: true,
-    validateResponses: true
+    validateRequests: true
+    // validateResponses: true
   })
 );
 

@@ -10,6 +10,9 @@ Project Milestones - 2 months(plus testing)
 6. Setup .env and env-var - Done
 7. Add swagger page - Done
 8. Add test - Done
+9. Add /register route
+9. Add /confirm-email route
+11. Fix openAPI schema generate
 
 ### Database and API design(1 week)
 Identify all entities

@@ -13,12 +13,7 @@ async function getUserById (req: Request, res: Response): Promise<void> {
 }
 
 async function createUser (req: Request, res: Response): Promise<void> {
-  const { user: userService } = getServices(req.app);
-  const { email } = req.body;
-
-  const user = await userService.createUser(email);
-
-  ResponseBuilder.success(res, 201, { user });
+  ResponseBuilder.success(res, 201, {});
 }
 
 // eslint-disable-next-line

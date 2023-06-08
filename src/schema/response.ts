@@ -1,14 +1,15 @@
 import { z } from 'zod';
 import { generateSchema } from '@anatine/zod-openapi';
 
-const user = z.object({
+const userRegistrationOutput = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string().nullish()
+  name: z.string().nullable(),
+  username: z.string().nullable()
 });
 
-const userResponseSchema = generateSchema(z.object({
-  data: z.object({ user })
+export const userRegistrationResponseSchema = generateSchema(z.object({
+  data: z.object({ user: userRegistrationOutput })
 }));
 
-export { userResponseSchema };
+export type UserRegistrationOutput = z.infer<typeof userRegistrationOutput>;
