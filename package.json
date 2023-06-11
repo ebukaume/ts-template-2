@@ -10,6 +10,11 @@
     "lint:fix": "npm run lint -- --fix",
     "dev": "nodemon",
     "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate deploy",
+    "db:sync": "npx prisma db push",
+    "local:db:up": "docker-compose up",
+    "local:db:down": "docker-compose down",
+    "dev:setup": "npm run db:generate && npm run db:migrate",
     "prepare": "husky install"
   },
   "keywords": [],
@@ -46,7 +51,6 @@
   "dependencies": {
     "@anatine/zod-openapi": "^1.14.0",
     "@prisma/client": "^4.15.0",
-    "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.0",
     "dotenv": "^16.1.3",
     "env-var": "^7.3.1",
@@ -54,6 +58,7 @@
     "express-async-errors": "^3.1.1",
     "express-openapi-validator": "^5.0.4",
     "jsonwebtoken": "^9.0.0",
+    "node-mailjet": "^6.0.2",
     "openapi3-ts": "^4.1.2",
     "pino-http": "^8.3.3",
     "swagger-ui-express": "^4.6.3",

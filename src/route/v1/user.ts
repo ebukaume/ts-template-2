@@ -7,7 +7,7 @@ const router = Router();
 async function getUserById (req: Request, res: Response): Promise<void> {
   const { user: userService } = getServices(req.app);
 
-  const user = await userService.getUserById(req.params.id);
+  const user = await userService.getById(req.params.id);
 
   ResponseBuilder.success(res, 200, { user });
 }

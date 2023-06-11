@@ -1,5 +1,5 @@
 import * as OpenApiValidator from 'express-openapi-validator';
-import express, { json } from 'express';
+import express, { json, urlencoded } from 'express';
 import pino from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
 import { injectDependencies } from './module/configureApp';
@@ -10,6 +10,7 @@ import { openAPIValidatorErrorMiddleware } from './middleware/openApiValidatorEr
 
 const app = express();
 
+app.use(urlencoded({ extended: true }));
 app.use(json());
 app.use(pino());
 

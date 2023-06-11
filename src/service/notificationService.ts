@@ -1,32 +1,56 @@
-import { type MailService } from '@sendgrid/mail';
-import { BASE_URL, CONFIRMATION_EMAIL_SENDER_ADDRESS } from '../config';
+import { type Request, type Client } from 'node-mailjet';
+import { type RequestData } from 'node-mailjet/declarations/request/Request';
+import { CONFIRMATION_EMAIL_SENDER_ADDRESS, CONFIRMATION_EMAIL_SENDER_NAME } from '../config';
+import { DomainErrror } from '../utils/error';
+
+interface ConfirmationEmailParams {
+  name: string
+  email: string
+  link: string
+}
 
 export interface NotificationService {
-  sendConfirmationEmail: (email: string, token: string) => Promise<void>
+  sendConfirmationEmail: (input: ConfirmationEmailParams) => Promise<void>
 }
 
 export class NotificationServiceImpl implements NotificationService {
-  constructor (private readonly sendgridMailService: MailService) { }
+  private readonly request: Request;
 
-  async sendConfirmationEmail (email: string, token: string): Promise<void> {
-    const confirmationLink = this.getConfirmationLink(email, token);
-
-    const msg = {
-      to: email,
-      from: CONFIRMATION_EMAIL_SENDER_ADDRESS,
-      subject: 'Registration confirmation',
-      text: 'Please confirm your email below',
-      html: `
-        <strong>
-          <a href=${confirmationLink}>Confirm you e-mail address</a>
-        </strong>
-      `
-    };
-
-    await this.sendgridMailService.send(msg);
+  constructor (mailjetClient: Client) {
+    this.request = mailjetClient.post('send', { version: 'v3.1' });
   }
 
-  private getConfirmationLink (email: string, token: string): string {
-    return `http://${BASE_URL}/confirm-registration?email=${email}&token=${token}`;
+  async sendConfirmationEmail (input: ConfirmationEmailParams): Promise<void> {
+    const { name, email, link } = input;
+
+    const data: RequestData = {
+      Messages: [
+        {
+          From: {
+            Email: CONFIRMATION_EMAIL_SENDER_ADDRESS,
+            Name: CONFIRMATION_EMAIL_SENDER_NAME
+          },
+          To: [
+            {
+              Email: email,
+              Name: name
+            }
+          ],
+          Subject: 'Registration confirmation',
+          TextPart: 'Please confirm your email address',
+          HTMLPart: `
+          <strong>
+            <a href=${link}>Confirm you e-mail address</a>
+          </strong>
+        `
+        }
+      ]
+    };
+
+    try {
+      await this.request.request(data);
+    } catch (error) {
+      throw DomainErrror.badGateway();
+    }
   }
 }

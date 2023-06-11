@@ -17,4 +17,11 @@ model User {
   username               String?
   password               String
   emailConfirmationToken String?
+  hasConfirmedEmail      Boolean @default(false)
+}
+
+model Session {
+  email        String @id
+  accessToken  String
+  refreshToken String @unique
 }

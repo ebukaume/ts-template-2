@@ -1,6 +1,6 @@
 import { type OpenAPIV3 } from 'express-openapi-validator/dist/framework/types';
 import { error, errorResponseSchema } from './error';
-import { userRegistrationResponseSchema } from './response';
+import { emailConfirmationResponseSchema, loginResponseSchema, userRegistrationResponseSchema } from './response';
 import { userRegisterationInputSchema } from './request';
 
 const v1Prefix = 'v1';
@@ -77,7 +77,7 @@ export const spec: OpenAPIV3.Document = {
         }
       }
     },
-    [`/${v1Prefix}/confirm-email`]: {
+    [`/${v1Prefix}/confirm-registration`]: {
       get: {
         tags: ['auth'],
         summary: 'Complete user registeration flow by confirming the provided email address',
@@ -106,7 +106,7 @@ export const spec: OpenAPIV3.Document = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/UserRegistrationOutput'
+                  $ref: '#/components/schemas/EmailConfirmationOutput'
                 }
               }
             }
@@ -115,6 +115,86 @@ export const spec: OpenAPIV3.Document = {
           404: error('User not found'),
           422: error('Unprocessible entity'),
           500: error('Internal server error')
+        }
+      }
+    },
+    [`/${v1Prefix}/login`]: {
+      post: {
+        tags: ['auth'],
+        summary: 'Logs in in a user',
+        description: 'Login using email and password',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: {
+                    type: 'string'
+                  },
+                  password: {
+                    type: 'string'
+                  }
+                },
+                required: ['email', 'password'],
+                additionalProperties: false
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Returns access and refresh token',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#components/schemas/UserRegistrationOutput'
+                }
+              }
+            }
+          },
+          400: error('Bad Request'),
+          500: error('Internal Server Error')
+        }
+      }
+    },
+    [`/${v1Prefix}/logout`]: {
+      delete: {
+        tags: ['auth'],
+        summary: 'Logs out in a user',
+        description: 'Log out',
+        parameters: [
+          {
+            name: 'accessToken',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string'
+            }
+          },
+          {
+            name: 'refreshToken',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'User has been logged out',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object'
+                }
+              }
+            }
+          },
+          400: error('Bad Request'),
+          500: error('Internal Server Error')
         }
       }
     }
@@ -130,8 +210,10 @@ export const spec: OpenAPIV3.Document = {
     headers: {},
     schemas: {
       Error: errorResponseSchema,
+      UserRegisterationInput: userRegisterationInputSchema,
       UserRegistrationOutput: userRegistrationResponseSchema,
-      UserRegisterationInput: userRegisterationInputSchema
+      EmailConfirmationOutput: emailConfirmationResponseSchema,
+      LoginOutput: loginResponseSchema
     }
   }
 };

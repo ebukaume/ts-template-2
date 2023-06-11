@@ -20,7 +20,7 @@ describe('UserServiceImpl', () => {
 
     getByIdMock.mockResolvedValueOnce(user);
 
-    const result = await userService.getUserById(userId);
+    const result = await userService.getById(userId);
 
     expect(result).toStrictEqual(user);
   });

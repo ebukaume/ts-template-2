@@ -5,12 +5,15 @@ import { PrismaClient } from '@prisma/client';
 import { DomainErrror } from '../utils/error';
 import { type AuthService, AuthServiceImpl } from '../service/authService';
 import { NotificationServiceImpl } from '../service/notificationService';
-import sendgrid from '@sendgrid/mail';
-import { SENDGRID_API_KEY } from '../config';
+import { MAILJET_API_KEY, MAILJET_API_SECRET } from '../config';
+import Mailjet from 'node-mailjet';
+import { type SessionService, SessionServiceImpl } from '../service/sessionService';
+import { SessionRepositoryImpl } from '../repository/sessionRepository';
 
 interface Service {
   user: UserService
   auth: AuthService
+  session: SessionService
 }
 
 interface LocalDependency {
@@ -19,14 +22,20 @@ interface LocalDependency {
 
 export function injectDependencies (app: Application): void {
   const userRepository = new UserRepositoryImpl(new PrismaClient());
+  const sessionRepository = new SessionRepositoryImpl(new PrismaClient());
   const userService = new UserServiceImpl(userRepository);
-  sendgrid.setApiKey(SENDGRID_API_KEY);
-  const notificationService = new NotificationServiceImpl(sendgrid);
-  const authService = new AuthServiceImpl(userRepository, notificationService);
+  const sessionService = new SessionServiceImpl(sessionRepository, userService);
+  const mailjet = new Mailjet({
+    apiKey: MAILJET_API_KEY,
+    apiSecret: MAILJET_API_SECRET
+  });
+  const notificationService = new NotificationServiceImpl(mailjet);
+  const authService = new AuthServiceImpl(userService, sessionService, notificationService);
 
   const service: Service = {
     user: userService,
-    auth: authService
+    auth: authService,
+    session: sessionService
   };
 
   const deps: LocalDependency = { service };

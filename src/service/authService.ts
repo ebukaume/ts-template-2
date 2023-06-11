@@ -1,24 +1,31 @@
 import { type User } from '@prisma/client';
-import { type UserRepository } from '../repository/userRepository';
 import { DomainErrror } from '../utils/error';
 import { type UserRegisterationInput } from '../schema/request';
 import { assertMatch, capitalize } from '../utils/string';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
-import { CONFIRMATION_EMAIL_EXPIRY, JWT_SECRET } from '../config';
+import { BASE_URL, CONFIRMATION_EMAIL_EXPIRY, JWT_SECRET } from '../config';
 import { type NotificationService } from './notificationService';
-import { type UserRegistrationOutput } from '../schema/response';
+import { type Token, type UserOutput, type UserRegistrationOutput } from '../schema/response';
+import { type UserService } from './userService';
+import { type SessionService } from './sessionService';
 
 export interface AuthService {
   register: (input: UserRegisterationInput) => Promise<UserRegistrationOutput>
-  confirmEmail: (userId: string) => Promise<User | undefined>
+  confirmEmail: (email: string, token: string) => Promise<UserOutput>
+  login: (email: string, password: string) => Promise<Token>
+  logout: (user: User | undefined) => Promise<void>
 }
 
 export class AuthServiceImpl implements AuthService {
   private readonly SALT_ROUNDS = 10;
 
-  constructor (private readonly userRepository: UserRepository, private readonly notificationService: NotificationService) { }
+  constructor (
+    private readonly userService: UserService,
+    private readonly sessionService: SessionService,
+    private readonly notificationService: NotificationService
+  ) { }
 
   async register (input: UserRegisterationInput): Promise<UserRegistrationOutput> {
     const { name, email, username, password, passwordConfirmation } = input;
@@ -40,25 +47,77 @@ export class AuthServiceImpl implements AuthService {
     };
     const token = this.getToken(userPartial);
 
-    await this.userRepository.create({
+    await this.userService.create({
       ...userPartial,
       password: hashedPassword,
-      emailConfirmationToken: token
+      emailConfirmationToken: token,
+      hasConfirmedEmail: false
     });
 
-    await this.notificationService.sendConfirmationEmail(email, token);
+    const link = this.buildConfirmationLink(email, token);
+    // TODO - re-enable after fixing email API issue
+    // await this.notificationService.sendConfirmationEmail({
+    //   name: fullname ?? email,
+    //   email,
+    //   link,
+    // });
 
-    return userPartial;
+    return { ...userPartial, confirmationLink: link };
   }
 
-  async confirmEmail (userId: string): Promise<User> {
-    const user = await this.userRepository.getById(userId);
+  async confirmEmail (email: string, token: string): Promise<UserOutput> {
+    const user = await this.userService.getByEmail(email);
 
-    if (user === undefined) {
-      throw DomainErrror.notFound(['user does not exist']);
+    if (user.hasConfirmedEmail) {
+      return user;
     }
 
-    return user;
+    if (user.emailConfirmationToken !== token) {
+      throw DomainErrror.badRequest(['wrong confirmation token']);
+    }
+
+    await this.userService.updateByEmail(email, { hasConfirmedEmail: true, emailConfirmationToken: '' });
+
+    return this.serializeUser(user);
+  }
+
+  async login (email: string, password: string): Promise<Token> {
+    const user = await this.userService.getByEmail(email);
+
+    return await this.authenticate(user, password);
+  }
+
+  async logout (user: User | undefined): Promise<void> {
+    if (user == null) {
+      return;
+    }
+
+    await this.sessionService.delete(user.email);
+  }
+
+  async authenticate (user: User, password: string): Promise<Token> {
+    if (!user.hasConfirmedEmail) {
+      throw DomainErrror.badRequest(['Please verify your email before logging in']);
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      throw DomainErrror.badRequest(['Wrong email/password']);
+    }
+
+    return await this.sessionService.create(user.email);
+  }
+
+  private serializeUser (user: User): UserOutput {
+    const { id, name, email, username } = user;
+
+    return {
+      id,
+      name,
+      email,
+      username
+    };
   }
 
   private buildFullname (name: UserRegisterationInput['name']): string | null {
@@ -75,5 +134,9 @@ export class AuthServiceImpl implements AuthService {
 
   private getToken (user: Partial<User>): string {
     return jsonwebtoken.sign(user, JWT_SECRET, { expiresIn: CONFIRMATION_EMAIL_EXPIRY });
+  }
+
+  private buildConfirmationLink (email: string, token: string): string {
+    return `${BASE_URL}/v1/confirm-registration?email=${encodeURIComponent(email)}&token=${token}`;
   }
 };
