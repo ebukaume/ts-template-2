@@ -1,13 +1,13 @@
 import { type Request, type Response, Router } from 'express';
-import { getServices } from '../../module/configureApp';
 import { ResponseBuilder } from '../../utils/responseBuilder';
 import { authenticate } from '../../middleware/authenticate';
 import { type AuthenticatedRequest } from '../../type';
+import { Dependency } from '../../module/dependency';
 
 const router = Router();
 
 async function registerHandler (req: Request, res: Response): Promise<void> {
-  const { auth: authService } = getServices(req.app);
+  const { auth: authService } = Dependency.service;
 
   const user = await authService.register(req.body);
 
@@ -15,7 +15,7 @@ async function registerHandler (req: Request, res: Response): Promise<void> {
 }
 
 async function confirmEmailHandler (req: Request, res: Response): Promise<void> {
-  const { auth: authService } = getServices(req.app);
+  const { auth: authService } = Dependency.service;
   const { email, token } = req.query;
 
   const data = await authService.confirmEmail(email as string, token as string);
@@ -24,16 +24,19 @@ async function confirmEmailHandler (req: Request, res: Response): Promise<void> 
 }
 
 async function loginHandler (req: Request, res: Response): Promise<void> {
-  const { auth: authService } = getServices(req.app);
+  const { auth: authService } = Dependency.service;
   const { email, password } = req.body;
 
-  const token = await authService.login(email, password);
+  const { accessToken, refreshToken } = await authService.login(email, password);
 
-  ResponseBuilder.success(res, 200, { token });
+  res.header('accessToken', accessToken);
+  res.header('refreshToken', refreshToken);
+
+  ResponseBuilder.success(res, 200, { accessToken, refreshToken });
 }
 
 async function logoutHandler (req: AuthenticatedRequest, res: Response): Promise<void> {
-  const { auth: authService } = getServices(req.app);
+  const { auth: authService } = Dependency.service;
 
   await authService.logout(req.user);
 

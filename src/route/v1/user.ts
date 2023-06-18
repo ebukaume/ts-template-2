@@ -1,11 +1,11 @@
 import { type Request, type Response, Router } from 'express';
-import { getServices } from '../../module/configureApp';
 import { ResponseBuilder } from '../../utils/responseBuilder';
+import { Dependency } from '../../module/dependency';
 
 const router = Router();
 
 async function getUserById (req: Request, res: Response): Promise<void> {
-  const { user: userService } = getServices(req.app);
+  const { user: userService } = Dependency.service;
 
   const user = await userService.getById(req.params.id);
 

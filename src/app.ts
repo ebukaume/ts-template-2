@@ -1,33 +1,36 @@
 import * as OpenApiValidator from 'express-openapi-validator';
-import express, { json, urlencoded } from 'express';
+import express, { type Application, json, urlencoded } from 'express';
 import pino from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
-import { injectDependencies } from './module/configureApp';
 import { setupRoutes } from './module/setupRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { spec } from './schema/spec';
 import { openAPIValidatorErrorMiddleware } from './middleware/openApiValidatorError';
+import { type Config, Dependency, type Driver } from './module/dependency';
 
-const app = express();
+export function createApp (drivers: Driver, config: Config): Application {
+  Dependency.build(drivers, config);
 
-app.use(urlencoded({ extended: true }));
-app.use(json());
-app.use(pino());
+  const app = express();
 
-app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(spec));
+  app.use(urlencoded({ extended: true }));
+  app.use(json());
+  app.use(pino());
 
-app.use(
-  OpenApiValidator.middleware({
-    apiSpec: spec,
-    validateRequests: true
-    // validateResponses: true
-  })
-);
+  app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(spec));
 
-injectDependencies(app);
-setupRoutes(app);
+  app.use(
+    OpenApiValidator.middleware({
+      apiSpec: spec,
+      validateRequests: true
+      // validateResponses: true
+    })
+  );
 
-app.use(openAPIValidatorErrorMiddleware());
-app.use(errorHandler());
+  setupRoutes(app);
 
-export { app };
+  app.use(openAPIValidatorErrorMiddleware());
+  app.use(errorHandler());
+
+  return app;
+}
